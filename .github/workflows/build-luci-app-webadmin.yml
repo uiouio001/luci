@@ -12,18 +12,16 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PACKAGES: luci-app-webadmin
-      TAG_NAME: r$(date +"%Y%m%d")
-      RELEASE_NAME: Release r$(date +"%Y%m%d")
     strategy:
       fail-fast: false
       matrix:
         arch:
           - aarch64_generic
-          - i386_pentium-mmx
-          - loongarch64_generic
-          - mips_mips32
-          - mipsel_24kc
-          - mipsel_mips32
+          #- i386_pentium-mmx
+          #- loongarch64_generic
+          #- mips_mips32
+          #- mipsel_24kc
+          #- mipsel_mips32
           - x86_64
 
     permissions:
@@ -31,6 +29,14 @@ jobs:
       contents: write
       
     steps:
+      - name: Init GITHUB_ENV
+        run: |
+          tag_name="r$(date +"%Y%m%d")"
+          echo "TAG_NAME=$tag_name" >> "$GITHUB_ENV"
+
+          release_name="Release r$(date +"%Y%m%d")"
+          echo "RELEASE_NAME=$release_name" >> "$GITHUB_ENV"
+          
       - name: Checkout
         uses: actions/checkout@main
         with:
