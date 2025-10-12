@@ -52,34 +52,31 @@ jobs:
       - name: Organize files
         run: |
           # 创建存放目录
-          mkdir -p webadmin_x86_64
-          mkdir -p webadmin_aarch64_generic
-
-          cp bin/packages/x86_64/packages_ci/*.ipk webadmin_x86_64/
-          cp bin/packages/aarch64_generic/packages_ci/*.ipk webadmin_aarch64_generic/
-
-          ls webadmin_x86_64
-          ls webadmin_aarch64_generic
-
+          mkdir -p webadmin_${{ matrix.arch }}
+          
+          ls bin/packages
+          
+          cp -f bin/packages/${{ matrix.arch }}/packages_ci/*.ipk webadmin_${{ matrix.arch }}/
+          
+          ls webadmin_${{ matrix.arch }}
+          
       - name: Create install.sh scripts
         run: |
-          cat <<EOF > webadmin_x86_64/install.sh
+          cat <<EOF > webadmin_${{ matrix.arch }}/install.sh
           #!/bin/sh
           opkg update
           if [ $? -ne 0 ]; then
               echo "update failed。"
               exit 1
           fi
-          opkg install webadmin_x86_64/*.ipk
+          opkg install webadmin_${{ matrix.arch }}/*.ipk
           EOF
           
-          chmod +x webadmin_x86_64/install.sh
-          cp webadmin_x86_64/install.sh webadmin_aarch64_generic/install.sh
+          chmod +x webadmin_${{ matrix.arch }}/install.sh
 
       - name: Move app directories to makeself
         run: |
-          mv webadmin_x86_64 makeself/
-          mv webadmin_aarch64_generic makeself/
+          mv webadmin_${{ matrix.arch }} makeself/
 
       - name: Fetch latest release tag
         run: |
@@ -89,8 +86,7 @@ jobs:
       - name: Create self-extracting packages
         run: |
           cd makeself
-          ./makeself.sh webadmin_x86_64/ webadmin_x86_64_${{ env.LATEST_TAG }}.run "by github action" ./install.sh
-          ./makeself.sh webadmin_aarch64_generic/ webadmin_aarch64_generic_${{ env.LATEST_TAG }}.run "by github action" ./install.sh
+          ./makeself.sh webadmin_${{ matrix.arch }}/ webadmin_${{ matrix.arch }}_${{ env.LATEST_TAG }}.run "by github action" ./install.sh
 
       - name: Check file sizes
         run: |
