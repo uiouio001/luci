@@ -38,17 +38,18 @@ jobs:
  
       - name: Commit files
         run: |
-          cd makeself
           git config --global user.name "GitHub Actions"
           git config --global user.email "uiouio_001@163.com"
-          #添加makeself目录下所有.run文件到缓冲区
-          git add *.run
-          git commit -a -m "Add *.run files"
-
-          #推送到指定目录
+          #添加.run文件到指定目录
           if [ "${{ matrix.arch }}" = "aarch64_generic" ]; then
-            git push -u origin main:/run/arm64
+            cp makeself/*.run run/arm64/
           else
-            git push -u origin main:/run/x86
+            cp makeself/*.run run/x86/
           fi
-
+          #添加到缓冲区
+          git add -A
+          #提交变更
+          git commit -a -m "Add run files"
+          #推送
+          git push
+          
