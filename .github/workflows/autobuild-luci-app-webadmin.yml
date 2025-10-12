@@ -53,13 +53,13 @@ jobs:
         run: |
           # 创建存放目录
           mkdir -p webadmin_x86_64
-          mkdir -p webadmin_aarch64_cortex
+          mkdir -p webadmin_aarch64_generic
 
-          cp bin/packages/${{ matrix.arch }}/packages_ci/*x86*.ipk webadmin_x86_64/
-          cp bin/packages/${{ matrix.arch }}/packages_ci/*aarch64*.ipk webadmin_aarch64_cortex/
+          cp bin/packages/x86_64/packages_ci/*.ipk webadmin_x86_64/
+          cp bin/packages/aarch64_generic/packages_ci/*.ipk webadmin_aarch64_generic/
 
           ls webadmin_x86_64
-          ls webadmin_aarch64_cortex
+          ls webadmin_aarch64_generic
 
       - name: Create install.sh scripts
         run: |
@@ -74,12 +74,12 @@ jobs:
           EOF
           
           chmod +x webadmin_x86_64/install.sh
-          cp webadmin_x86_64/install.sh webadmin_aarch64_cortex/install.sh
+          cp webadmin_x86_64/install.sh webadmin_aarch64_generic/install.sh
 
       - name: Move app directories to makeself
         run: |
           mv webadmin_x86_64 makeself/
-          mv webadmin_aarch64_cortex makeself/
+          mv webadmin_aarch64_generic makeself/
 
       - name: Fetch latest release tag
         run: |
@@ -90,7 +90,7 @@ jobs:
         run: |
           cd makeself
           ./makeself.sh webadmin_x86_64/ webadmin_x86_64_${{ env.LATEST_TAG }}.run "by github action" ./install.sh
-          ./makeself.sh webadmin_aarch64_cortex/ webadmin_aarch64_cortex_${{ env.LATEST_TAG }}.run "by github action" ./install.sh
+          ./makeself.sh webadmin_aarch64_generic/ webadmin_aarch64_generic_${{ env.LATEST_TAG }}.run "by github action" ./install.sh
 
       - name: Check file sizes
         run: |
