@@ -28,9 +28,27 @@ jobs:
       contents: write
       
     steps:
+      - name: Fetch latest release tag
+        run: |
+          #通过tag修改触发,直接获取
+          latest_tag=${{ github.ref }}
+          if [ "$latest_tag" = "null" ] || [ -z "$latest_tag" ]; then
+            #通过url获取
+            latest_tag=$(curl -s https://github.com/uiouio001/luci/releases/latest | jq -r '.tag_name')
+          fi
+
+          if [ "$latest_tag" = "null" ] || [ -z "$latest_tag" ]; then
+            #直接设置为当天日期
+            latest_tag="r$(date +"%Y%m%d")"
+          fi
+          
+          echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
+          echo "✅ Found release tag: $LATEST_TAG"
+          
       - uses: actions/checkout@main
         with:
           fetch-depth: 0
+    
       - name: Building packages
         uses: sbwml/openwrt-gh-action-sdk@main
         env:
