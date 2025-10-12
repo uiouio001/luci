@@ -43,7 +43,7 @@ jobs:
           fi
           
           echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
-          echo "✅ Found release tag: $LATEST_TAG"
+          echo "✅ Found release tag: ${{ env.LATEST_TAG }}"
           
       - uses: actions/checkout@main
         with:
