@@ -1,0 +1,33 @@
+name: test
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - aarch64_generic
+          - x86_64
+
+    permissions:
+      actions: write
+      contents: write
+      
+    steps:
+      - name: Fetch latest release tag
+        run: |
+          latest_tag="r$(date +"%Y%m%d")"
+          echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
+          echo "✅ Found release tag: ${{ env.LATEST_TAG }}"
+          echo $latest_tag
+
+
+          
