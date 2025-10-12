@@ -30,12 +30,8 @@ jobs:
     steps:
       - name: Fetch latest release tag
         run: |
-          #通过tag修改触发,直接获取
-          latest_tag=${{ github.ref }}
-          if [ "$latest_tag" = "null" ] || [ -z "$latest_tag" ]; then
-            #通过url获取
-            latest_tag=$(curl -s https://github.com/uiouio001/luci/releases/latest | jq -r '.tag_name')
-          fi
+          #通过url获取
+          latest_tag=$(curl -s https://github.com/uiouio001/luci/releases/latest | jq -r '.tag_name')
 
           if [ "$latest_tag" = "null" ] || [ -z "$latest_tag" ]; then
             #直接设置为当天日期
@@ -97,12 +93,8 @@ jobs:
 
       - name: Fetch latest release tag
         run: |
-          #通过tag修改触发,直接获取
-          latest_tag=${{ github.ref }}
-          if [ "$latest_tag" = "null" ] || [ -z "$latest_tag" ]; then
-            #通过url获取
-            latest_tag=$(curl -s https://github.com/uiouio001/luci/releases/latest | jq -r '.tag_name')
-          fi
+          #通过url获取
+          latest_tag=$(curl -s https://github.com/uiouio001/luci/releases/latest | jq -r '.tag_name')
 
           if [ "$latest_tag" = "null" ] || [ -z "$latest_tag" ]; then
             #直接设置为当天日期
@@ -110,7 +102,7 @@ jobs:
           fi
           
           echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
-          echo "✅ Found release tag: $LATEST_TAG"
+          echo "✅ Found release tag: ${{ env.LATEST_TAG }}"
           
       - name: Create self-extracting packages
         run: |
