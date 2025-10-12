@@ -15,11 +15,11 @@ jobs:
       matrix:
         arch:
           - aarch64_generic
-          #- i386_pentium-mmx
-          #- loongarch64_generic
-          #- mips_mips32
-          #- mipsel_24kc
-          #- mipsel_mips32
+          - i386_pentium-mmx
+          - loongarch64_generic
+          - mips_mips32
+          - mipsel_24kc
+          - mipsel_mips32
           - x86_64
 
     permissions:
