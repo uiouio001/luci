@@ -108,13 +108,15 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "uiouio_001@163.com"
-          #添加makeself目录下所有.run文件到缓冲区
-          git makeself/*.run
-          #提交信息
-          git commit -m "Automated make .run files"
-          #推送到指定目录
+          #添加.run文件到指定目录
           if [ "${{ matrix.arch }}" = "aarch64_generic" ]; then
-            git push origin main:/run/arm64
+            cp makeself/*.run run/arm64/
+            git add run/arm64/*.run
           else
-            git push origin main:/run/x86
+            cp makeself/*.run run/x86/
+            git add run/x86/**.run
           fi
+          #提交变更
+          git commit -a -m "Add run files"
+          #推送
+          git push
