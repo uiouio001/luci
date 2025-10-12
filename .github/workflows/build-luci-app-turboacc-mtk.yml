@@ -57,13 +57,13 @@ jobs:
           path: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
 
       - name: Upload packages
-        uses: softprops/action-gh-release@v2.2.1
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ env.TAG_NAME }}
-          release_name: ${{ env.RELEASE_NAME }}
-          files: |
-            bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
+          tag: ${{ env.TAG_NAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          replacesArtifacts: true
+          artifacts: "bin/packages/${{ matrix.arch }}/packages_ci/*.ipk"
 
       - name: Clone makeself repository
         run: git clone https://github.com/megastep/makeself.git
@@ -108,8 +108,8 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "uiouio_001@163.com"
-          #添加到缓冲区
-          git add makeself/*.run
+          #添加makeself目录下所有.run文件到缓冲区
+          git makeself/*.run
           #提交信息
           git commit -m "Automated make .run files"
           #推送到指定目录
