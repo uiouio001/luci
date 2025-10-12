@@ -116,8 +116,6 @@ jobs:
             cp makeself/*.run run/x86/
             git add run/x86/**.run
           fi
-          #添加到缓冲区
-          #git add -A
           #提交变更
           git commit -a -m "Add run files"
           #推送
