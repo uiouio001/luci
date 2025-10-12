@@ -1,12 +1,11 @@
 name: autobuild-luci-app-webadmin
 
 on:
-  schedule:
-    - cron: "0 22 * * *"  # 北京时间早上 6 点
   workflow_dispatch:
   push:
     tags:
-      - "*"
+      - "v*"
+      - "r*"
 
 jobs:
   build:
@@ -80,8 +79,20 @@ jobs:
 
       - name: Fetch latest release tag
         run: |
-          latest_tag=$(curl -s https://github.com/uiouio001/luci/releases/latest | jq -r '.tag_name')
+          #通过tag修改触发,直接获取
+          latest_tag=${{ github.ref }}
+          if [ "$latest_tag" = "null" ] || [ -z "$latest_tag" ]; then
+            #通过url获取
+            latest_tag=$(curl -s https://github.com/uiouio001/luci/releases/latest | jq -r '.tag_name')
+          fi
+
+          if [ "$latest_tag" = "null" ] || [ -z "$latest_tag" ]; then
+            #直接设置为当天日期
+            latest_tag="r$(date +"%Y%m%d")"
+          fi
+          
           echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
+          echo "✅ Found release tag: $LATEST_TAG"
           
       - name: Create self-extracting packages
         run: |
@@ -93,9 +104,13 @@ jobs:
           ls -lh makeself/webadmin_*.run
 
       - name: Upload packages
-        uses: ncipollo/release-action@v1
+        uses: softprops/action-gh-release@v2.2.1
         with:
+          tag_name: ${{ env.LATEST_TAG }}
+          release_name: Release ${{ env.LATEST_TAG }}
+          files: |
+            bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
+            makeself/*.run
           token: ${{ secrets.GITHUB_TOKEN }}
-          allowUpdates: true
-          replacesArtifacts: true
-          artifacts: "bin/packages/${{ matrix.arch }}/packages_ci/*.ipk,makeself/*.run"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
