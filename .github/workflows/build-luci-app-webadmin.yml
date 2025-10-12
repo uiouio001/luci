@@ -10,6 +10,10 @@ jobs:
   build:
     name: Build ${{ matrix.arch }}
     runs-on: ubuntu-latest
+    env:
+      PACKAGES: luci-app-webadmin
+      TAG_NAME: r$(date +"%Y%m%d")
+      RELEASE_NAME: Release r$(date +"%Y%m%d")
     strategy:
       fail-fast: false
       matrix:
@@ -27,12 +31,6 @@ jobs:
       contents: write
       
     steps:
-      - name: Fetch latest release tag
-        run: |
-          latest_tag="r$(date +"%Y%m%d")"
-          echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
-          echo "✅ Found release tag: $latest_tag"
-          
       - name: Checkout
         uses: actions/checkout@main
         with:
@@ -43,7 +41,7 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}-openwrt-24.10
           FEEDNAME: packages_ci
-          PACKAGES: luci-app-webadmin
+          PACKAGES: ${{ env.PACKAGES }}
           NO_REFRESH_CHECK: true
 
       - name: Upload artifacts
@@ -85,18 +83,17 @@ jobs:
       - name: Create self-extracting packages
         run: |
           cd makeself
-          ./makeself.sh app_${{ matrix.arch }}/ ${{ env.PACKAGES }}_${{ matrix.arch }}_${{ env.LATEST_TAG }}.run "by github action" ./install.sh
+          ./makeself.sh app_${{ matrix.arch }}/ ${{ env.PACKAGES }}_${{ matrix.arch }}_${{ env.TAG_NAME }}.run "by github action" ./install.sh
 
       - name: Check file sizes
         run: |
-          ls -lh makeself/*.ipk
           ls -lh makeself/*.run
 
       - name: Upload packages
         uses: softprops/action-gh-release@v2.2.1
         with:
-          tag_name: ${{ env.LATEST_TAG }}
-          release_name: Release ${{ env.LATEST_TAG }}
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: ${{ env.RELEASE_NAME }}
           files: |
             bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
             makeself/*.run
