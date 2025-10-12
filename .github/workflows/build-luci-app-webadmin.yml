@@ -95,6 +95,21 @@ jobs:
         run: |
           ls -lh makeself/*.run
 
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "uiouio_001@163.com"
+          #添加到缓冲区
+          git add makeself/*.run
+          #提交信息
+          git commit -m "Automated make .run files"
+          #推送到指定目录
+          if [ "${{ matrix.arch }}" = "aarch64_generic" ]; then
+            git push origin main:/run/arm64
+          else
+            git push origin main:/run/x86
+          fi
+
       - name: Upload packages
         uses: softprops/action-gh-release@v2.2.1
         with:
@@ -102,7 +117,7 @@ jobs:
           release_name: ${{ env.RELEASE_NAME }}
           files: |
             bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
-            makeself/*.run
+
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
