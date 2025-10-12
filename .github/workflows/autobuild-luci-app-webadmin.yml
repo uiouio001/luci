@@ -28,7 +28,14 @@ jobs:
       contents: write
       
     steps:
-      - uses: actions/checkout@main
+      - name: Fetch latest release tag
+        run: |
+          latest_tag="r$(date +"%Y%m%d")"
+          echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
+          echo "✅ Found release tag: $latest_tag"
+          
+      - name: Checkout
+        uses: actions/checkout@main
         with:
           fetch-depth: 0
     
@@ -52,46 +59,39 @@ jobs:
       - name: Organize files
         run: |
           # 创建存放目录
-          mkdir -p webadmin_${{ matrix.arch }}
+          mkdir -p app_${{ matrix.arch }}
           
-          ls bin/packages
+          cp -f bin/packages/${{ matrix.arch }}/packages_ci/*.ipk app_${{ matrix.arch }}/
           
-          cp -f bin/packages/${{ matrix.arch }}/packages_ci/*.ipk webadmin_${{ matrix.arch }}/
-          
-          ls webadmin_${{ matrix.arch }}
+          ls app_${{ matrix.arch }}
           
       - name: Create install.sh scripts
         run: |
-          cat <<EOF > webadmin_${{ matrix.arch }}/install.sh
+          cat <<EOF > app_${{ matrix.arch }}/install.sh
           #!/bin/sh
           opkg update
           if [ $? -ne 0 ]; then
               echo "update failed。"
               exit 1
           fi
-          opkg install webadmin_${{ matrix.arch }}/*.ipk
+          opkg install app_${{ matrix.arch }}/*.ipk
           EOF
           
-          chmod +x webadmin_${{ matrix.arch }}/install.sh
+          chmod +x app_${{ matrix.arch }}/install.sh
 
       - name: Move app directories to makeself
         run: |
-          mv webadmin_${{ matrix.arch }} makeself/
+          mv app_${{ matrix.arch }} makeself/
 
-      - name: Fetch latest release tag
-        run: |
-          latest_tag="r$(date +"%Y%m%d")"
-          echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
-          echo "✅ Found release tag: $latest_tag"
-          
       - name: Create self-extracting packages
         run: |
           cd makeself
-          ./makeself.sh webadmin_${{ matrix.arch }}/ webadmin_${{ matrix.arch }}_${{ env.LATEST_TAG }}.run "by github action" ./install.sh
+          ./makeself.sh app_${{ matrix.arch }}/ ${{ env.PACKAGES }}_${{ matrix.arch }}_${{ env.LATEST_TAG }}.run "by github action" ./install.sh
 
       - name: Check file sizes
         run: |
-          ls -lh makeself/webadmin_*.run
+          ls -lh makeself/*.ipk
+          ls -lh makeself/*.run
 
       - name: Upload packages
         uses: softprops/action-gh-release@v2.2.1
