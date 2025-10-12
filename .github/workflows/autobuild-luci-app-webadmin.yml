@@ -1,6 +1,8 @@
 name: autobuild-luci-app-webadmin
 
 on:
+  schedule:
+    - cron: "0 22 * * *"  # 北京时间早上 6 点
   workflow_dispatch:
   push:
     tags:
@@ -15,13 +17,17 @@ jobs:
       matrix:
         arch:
           - aarch64_generic
-          - i386_pentium-mmx
-          - loongarch64_generic
-          - mips_mips32
-          - mipsel_24kc
-          - mipsel_mips32
+          #- i386_pentium-mmx
+          #- loongarch64_generic
+          #- mips_mips32
+          #- mipsel_24kc
+          #- mipsel_mips32
           - x86_64
 
+    permissions:
+      actions: write
+      contents: write
+      
     steps:
       - uses: actions/checkout@main
         with:
@@ -40,10 +46,60 @@ jobs:
           name: ${{ matrix.arch }}
           path: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
 
+      - name: Clone makeself repository
+        run: git clone https://github.com/megastep/makeself.git
+
+      - name: Organize files
+        run: |
+          # 创建存放目录
+          mkdir -p webadmin_x86_64
+          mkdir -p webadmin_aarch64_cortex
+
+          cp bin/packages/${{ matrix.arch }}/packages_ci/*x86*.ipk webadmin_x86_64/
+          cp bin/packages/${{ matrix.arch }}/packages_ci/*aarch64*.ipk webadmin_aarch64_cortex/
+
+          ls webadmin_x86_64
+          ls webadmin_aarch64_cortex
+
+      - name: Create install.sh scripts
+        run: |
+          cat <<EOF > webadmin_x86_64/install.sh
+          #!/bin/sh
+          opkg update
+          if [ $? -ne 0 ]; then
+              echo "update failed。"
+              exit 1
+          fi
+          opkg install webadmin_x86_64/*.ipk
+          EOF
+          
+          chmod +x webadmin_x86_64/install.sh
+          cp webadmin_x86_64/install.sh webadmin_aarch64_cortex/install.sh
+
+      - name: Move app directories to makeself
+        run: |
+          mv webadmin_x86_64 makeself/
+          mv webadmin_aarch64_cortex makeself/
+
+      - name: Fetch latest release tag
+        run: |
+          latest_tag=$(curl -s https://github.com/uiouio001/luci/releases/latest | jq -r '.tag_name')
+          echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
+          
+      - name: Create self-extracting packages
+        run: |
+          cd makeself
+          ./makeself.sh webadmin_x86_64/ webadmin_x86_64_${{ env.LATEST_TAG }}.run "by github action" ./install.sh
+          ./makeself.sh webadmin_aarch64_cortex/ webadmin_aarch64_cortex_${{ env.LATEST_TAG }}.run "by github action" ./install.sh
+
+      - name: Check file sizes
+        run: |
+          ls -lh makeself/webadmin_*.run
+
       - name: Upload packages
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
           replacesArtifacts: true
-          artifacts: "bin/packages/${{ matrix.arch }}/packages_ci/*.ipk"
+          artifacts: "bin/packages/${{ matrix.arch }}/packages_ci/*.ipk,makeself/*.run"
