@@ -1,6 +1,7 @@
 name: autobuild-luci-app-webadmin
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - v*
