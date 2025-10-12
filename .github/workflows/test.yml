@@ -37,11 +37,12 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "uiouio_001@163.com"
-          #添加.run文件到指定目录
           if [ "${{ matrix.arch }}" = "aarch64_generic" ]; then
             cp makeself/*.run run/arm64/
+            git add run/arm64/*.run
           else
             cp makeself/*.run run/x86/
+            git add run/x86/**.run
           fi
           #添加到缓冲区
           git add -A
