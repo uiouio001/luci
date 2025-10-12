@@ -1,6 +1,7 @@
 name: autobuild-luci-app-turboacc-mtk
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - v*
