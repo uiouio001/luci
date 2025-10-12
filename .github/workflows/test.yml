@@ -19,8 +19,14 @@ jobs:
     permissions:
       actions: write
       contents: write
+      pull-requests: write
       
     steps:
+      - name: Checkout
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+      
       - name: Organize files
         run: |
           # 创建存放目录
@@ -29,25 +35,20 @@ jobs:
           echo "Hello, World!" > makeself/hello.run
           
           ls makeself
-
-      - name: Commit and push changes
-        run: |  
+ 
+      - name: Commit files
+        run: |
           cd makeself
           git config --global user.name "GitHub Actions"
           git config --global user.email "uiouio_001@163.com"
-          
-          git init
           #添加makeself目录下所有.run文件到缓冲区
           git add *.run
-          #提交信息
-          git commit -m "Automated make .run files"
-          git remote add origin git@github.com:uiouio001/luci.git
+          git commit -a -m "Add *.run files"
+
           #推送到指定目录
           if [ "${{ matrix.arch }}" = "aarch64_generic" ]; then
             git push -u origin main:/run/arm64
           else
             git push -u origin main:/run/x86
           fi
-
-          
 
