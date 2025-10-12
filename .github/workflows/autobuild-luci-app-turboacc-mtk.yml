@@ -21,7 +21,10 @@ jobs:
           - mipsel_24kc
           - mipsel_mips32
           - x86_64
-
+    permissions:
+      actions: write
+      contents: write
+    
     steps:
       - uses: actions/checkout@main
         with:
