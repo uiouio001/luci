@@ -30,14 +30,7 @@ jobs:
     steps:
       - name: Fetch latest release tag
         run: |
-          #通过url获取
-          latest_tag=$(curl -s https://github.com/uiouio001/luci/releases/latest | jq -r '.tag_name')
-
-          if [ "$latest_tag" = "null" ] || [ -z "$latest_tag" ]; then
-            #直接设置为当天日期
-            latest_tag="r$(date +"%Y%m%d")"
-          fi
-          
+          latest_tag="r$(date +"%Y%m%d")"
           echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
           echo "✅ Found release tag: ${{ env.LATEST_TAG }}"
           
