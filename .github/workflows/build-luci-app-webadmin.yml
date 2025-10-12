@@ -63,7 +63,6 @@ jobs:
           release_name: ${{ env.RELEASE_NAME }}
           files: |
             bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
-
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
