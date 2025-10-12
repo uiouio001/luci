@@ -15,7 +15,6 @@ jobs:
       matrix:
         arch:
           - aarch64_generic
-          - x86_64
 
     permissions:
       actions: write
@@ -26,8 +25,9 @@ jobs:
         run: |
           latest_tag="r$(date +"%Y%m%d")"
           echo "LATEST_TAG=$latest_tag" >> $GITHUB_ENV
+          echo "✅ Found release tag: $latest_tag"
+
+      - name: show
+        run: |
           echo "✅ Found release tag: ${{ env.LATEST_TAG }}"
-          echo $latest_tag
-
-
           
