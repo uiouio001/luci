@@ -56,6 +56,18 @@ jobs:
           name: ${{ matrix.arch }}
           path: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
 
+      - name: Upload packages
+        uses: softprops/action-gh-release@v2.2.1
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: ${{ env.RELEASE_NAME }}
+          files: |
+            bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
+
+          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Clone makeself repository
         run: git clone https://github.com/megastep/makeself.git
 
@@ -109,15 +121,4 @@ jobs:
           else
             git push origin main:/run/x86
           fi
-
-      - name: Upload packages
-        uses: softprops/action-gh-release@v2.2.1
-        with:
-          tag_name: ${{ env.TAG_NAME }}
-          release_name: ${{ env.RELEASE_NAME }}
-          files: |
-            bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
-
-          token: ${{ secrets.GITHUB_TOKEN }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
