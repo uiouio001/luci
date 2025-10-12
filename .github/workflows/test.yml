@@ -32,12 +32,13 @@ jobs:
 
       - name: Commit and push changes
         run: |  
+          cd makeself
           git config --global user.name "GitHub Actions"
           git config --global user.email "uiouio_001@163.com"
           
           git init
           #添加makeself目录下所有.run文件到缓冲区
-          git add makeself/*.run
+          git add *.run
           #提交信息
           git commit -m "Automated make .run files"
           git remote add origin git@github.com:uiouio001/luci.git
